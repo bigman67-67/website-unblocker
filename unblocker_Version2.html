@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Drive</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='20' font-size='20'>📁</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .tab-cloak {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e0e0e0;
+        }
+
+        .tab-cloak:hover {
+            background: #e8eaed;
+            border-color: #d0d0d0;
+        }
+
+        .tab-cloak input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .tab-cloak input:checked {
+            accent-color: #667eea;
+        }
+
+        .tab-cloak label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        .input-section label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="url"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .proxy-input {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .proxy-input label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .proxy-input input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .proxy-input small {
+            display: block;
+            color: #666;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            color: #1565c0;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 15px;
+            border-radius: 4px;
+            color: #c62828;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .preview {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .preview.show {
+            display: block;
+        }
+
+        .preview iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+            border-radius: 6px;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .quick-link {
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        .quick-link:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .quick-link a {
+            text-decoration: none;
+            color: #333;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .input-wrapper {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔓 Unblocker</h1>
+            <p>Access restricted content safely</p>
+        </div>
+
+        <div id="error" class="error"></div>
+
+        <div class="tab-cloak">
+            <input type="checkbox" id="cloakTab" checked>
+            <label for="cloakTab">
+                <span>🔒 Tab Cloaking</span>
+                <small style="color: #666; font-size: 12px;">(Disguise tab title & icon)</small>
+            </label>
+        </div>
+
+        <div class="proxy-input">
+            <label for="proxyUrl">Proxy Service URL (Optional)</label>
+            <input type="text" id="proxyUrl" placeholder="https://your-proxy-service.com/proxy?url=" value="">
+            <small>💡 Example: https://render-proxy-service.onrender.com/proxy?url=</small>
+            <small>If left empty, the unblocker will attempt direct access</small>
+        </div>
+
+        <div class="input-section">
+            <label for="urlInput">Enter URL to Access</label>
+            <div class="input-wrapper">
+                <input type="url" id="urlInput" placeholder="https://www.youtube.com" value="https://www.youtube.com">
+                <button onclick="unblockUrl()">Access</button>
+            </div>
+        </div>
+
+        <div class="quick-links">
+            <div class="quick-link" onclick="setUrl('https://www.youtube.com')">
+                <a href="#">📺 YouTube</a>
+            </div>
+            <div class="quick-link" onclick="setUrl('https://www.reddit.com')">
+                <a href="#">🔗 Reddit</a>
+            </div>
+            <div class="quick-link" onclick="setUrl('https://www.twitch.tv')">
+                <a href="#">🎮 Twitch</a>
+            </div>
+            <div class="quick-link" onclick="setUrl('https://www.discord.com')">
+                <a href="#">💬 Discord</a>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>ℹ️ Setup Instructions:</strong>
+            1. Enter a proxy service URL above (or deploy your own to Render)<br>
+            2. Enter the website URL you want to access<br>
+            3. Click "Access" to load the site through the proxy<br>
+            4. Enable tab cloaking to hide the unblocker tab
+        </div>
+
+        <div class="preview" id="preview">
+            <iframe id="proxyFrame" src="" title="Proxy Preview"></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Tab Cloaking Functionality
+        const cloakTab = document.getElementById('cloakTab');
+        
+        cloakTab.addEventListener('change', function() {
+            if (this.checked) {
+                document.title = 'Google Drive';
+                updateFavicon('📁');
+            } else {
+                document.title = 'Unblocker';
+                updateFavicon('🔓');
+            }
+            localStorage.setItem('cloakEnabled', this.checked);
+        });
+
+        function updateFavicon(emoji) {
+            const favicon = document.querySelector('link[rel="icon"]');
+            favicon.href = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='20' font-size='20'>${emoji}</text></svg>`;
+        }
+
+        // Load saved preferences
+        if (localStorage.getItem('cloakEnabled') !== 'false') {
+            cloakTab.checked = true;
+            document.title = 'Google Drive';
+        }
+
+        // Load saved proxy URL
+        const savedProxy = localStorage.getItem('proxyUrl');
+        if (savedProxy) {
+            document.getElementById('proxyUrl').value = savedProxy;
+        }
+
+        // Unblocker Functions
+        function setUrl(url) {
+            document.getElementById('urlInput').value = url;
+        }
+
+        function unblockUrl() {
+            const url = document.getElementById('urlInput').value;
+            const proxyUrl = document.getElementById('proxyUrl').value;
+            const errorBox = document.getElementById('error');
+            const preview = document.getElementById('preview');
+
+            errorBox.classList.remove('show');
+
+            // Validate URL
+            if (!url) {
+                showError('Please enter a URL');
+                return;
+            }
+
+            try {
+                new URL(url);
+            } catch (e) {
+                showError('Invalid URL format');
+                return;
+            }
+
+            // Save proxy URL
+            if (proxyUrl) {
+                localStorage.setItem('proxyUrl', proxyUrl);
+            }
+
+            // Construct proxy request
+            let finalUrl;
+            if (proxyUrl) {
+                finalUrl = proxyUrl + encodeURIComponent(url);
+            } else {
+                showError('Please configure a proxy service URL first');
+                return;
+            }
+
+            // Load in iframe
+            const frame = document.getElementById('proxyFrame');
+            frame.src = finalUrl;
+            preview.classList.add('show');
+        }
+
+        function showError(message) {
+            const errorBox = document.getElementById('error');
+            errorBox.textContent = '❌ ' + message;
+            errorBox.classList.add('show');
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                unblockUrl();
+            }
+        });
+
+        // Set initial tab cloak state
+        window.addEventListener('load', function() {
+            if (cloakTab.checked) {
+                document.title = 'Google Drive';
+                updateFavicon('📁');
+            }
+        });
+    </script>
+</body>
+</html>
